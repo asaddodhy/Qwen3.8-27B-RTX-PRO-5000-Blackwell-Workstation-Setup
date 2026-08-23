@@ -20,6 +20,8 @@ Before changing or reproducing the setup:
    addresses, model weights, Python environments, or generated caches.
 9. Validate server health and API output before benchmarking.
 10. Use the exact benchmark method in `docs/BENCHMARKS.md` for comparisons.
+11. Do not repeat the documented vLLM mixed 8K/32K-context then concurrency-four
+    sequence: it caused an Xid 31 MMU fault in this package stack.
 
 The supported vLLM baseline to protect is 84.27 tok/s average with MTP4,
 65,536 context limit, FP8 KV cache, text-only mode, and native SM120 NVFP4

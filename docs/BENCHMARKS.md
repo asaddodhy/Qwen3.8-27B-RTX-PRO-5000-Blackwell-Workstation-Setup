@@ -66,3 +66,56 @@ validated experimentally on the same RTX PRO 5000. The same deterministic
 NInfer used INT8 group-64 KV cache, CUDA graphs, 65,536 context/KV capacity,
 and maximum concurrency one. Prefix reuse remained enabled. See `docs/NINFER.md`
 for the distinction between upstream support and local validation.
+
+## vLLM Long-Context Results
+
+These requests used the validated vLLM MTP4 server and 512 generated tokens.
+The reported rate is completion tokens divided by total client-observed time,
+so it includes prompt prefill rather than isolating decode only.
+
+| Prompt tokens | Completion tokens | Total time | End-to-end completion tok/s |
+| ---: | ---: | ---: | ---: |
+| 8,158 | 512 | 7.803 s | 65.62 |
+| 32,734 | 512 | 12.233 s | 41.85 |
+
+This decline is expected: larger active prompts require more prefill work and
+increase attention/cache work during generation. Do not compare these values
+directly with the short 31-token prompt's 84.27 tok/s average as if they were
+decode-only measurements.
+
+## vLLM Concurrent Requests
+
+On a fresh vLLM MTP4 server, after short single-request warm-up/benchmarking,
+four simultaneous short prompts each generated 512 tokens successfully:
+
+| Concurrency | Total completion tokens | Wall time | Aggregate tok/s |
+| ---: | ---: | ---: | ---: |
+| 4 | 2,048 | 8.459 s | 242.12 |
+
+Individual client-observed latencies ranged from 7.21 to 8.46 seconds. The
+server was configured with `--max-num-seqs 8` and reported no failed requests in
+this fresh-server run.
+
+### Stateful Failure Sequence
+
+A different sequence was not stable:
+
+1. Start the same vLLM MTP4 server.
+2. Complete an approximately 8K prompt plus 512 output tokens.
+3. Complete an approximately 32K prompt plus 512 output tokens.
+4. Submit four simultaneous short 512-token requests.
+
+During step 4, vLLM 0.27.1/FlashInfer encountered a CUDA illegal memory access
+while building attention metadata. The NVIDIA driver logged Xid 31 (MMU fault),
+all four requests returned HTTP 500, and the engine exited. This was not a VRAM
+out-of-memory event; cache usage was reported near 21% immediately beforehand.
+
+The GPU did not enter reset-required state. A fresh PyTorch CUDA matrix
+multiplication succeeded afterward, and NVIDIA reported recovery action `None`,
+so no reboot was required.
+
+Treat concurrent vLLM MTP4 serving as **conditionally validated**, not fully
+stable across mixed long-context and batched workloads. Do not reproduce the
+known failing sequence on a production service. Prefer NInfer for the tested
+single-user latency path, or retest concurrency after upgrading vLLM/FlashInfer
+in an isolated environment.

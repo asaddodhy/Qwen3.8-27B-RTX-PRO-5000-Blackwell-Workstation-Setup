@@ -3,7 +3,7 @@ schema: kit/1.0
 slug: qwen38-27b-rtx-pro-5000-blackwell
 title: Qwen3.8-27B on RTX PRO 5000 Blackwell Workstation
 summary: Reproduce an 84 tok/s Qwen3.8-27B NVFP4 vLLM server on an RTX PRO 5000 Blackwell 48 GB workstation.
-version: 1.1.0
+version: 1.2.0
 owner: asaddodhy
 license: MIT
 tags: [qwen3-8, vllm, nvfp4, blackwell, local-llm, inference, benchmark]
@@ -64,6 +64,9 @@ failures:
     scope: environment
   - problem: NInfer's 20 GiB artifact could not be reconstructed on the 31 GiB /tmp tmpfs.
     resolution: Download the artifact directly to the persistent home filesystem.
+    scope: environment
+  - problem: vLLM crashed with CUDA illegal memory access and Xid 31 when concurrency four followed sequential 8K and 32K context requests.
+    resolution: Avoid this mixed-context concurrency sequence; verify CUDA health after failure and retest only with an isolated upgraded stack.
     scope: environment
 inputs:
   - name: workstation
@@ -204,6 +207,8 @@ differ. The existing validated runtime is temporary under `/tmp/opencode`.
     `./scripts/install-ninfer.sh`, download and verify its artifact, then use the
     dedicated NInfer lifecycle and benchmark scripts. Never run both engines at
     once on this 48 GB GPU.
+12. Do not reproduce the known vLLM mixed long-context/concurrency-four failure
+    sequence. Read `docs/BENCHMARKS.md` before any concurrent-load testing.
 
 ## Failures Overcome
 

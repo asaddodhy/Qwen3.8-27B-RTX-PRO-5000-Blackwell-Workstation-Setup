@@ -161,6 +161,9 @@ components listed above must remain mutually compatible at CUDA 13.2.
   model and caches under the home filesystem are persistent.
 - The original workspace path contains a space. FlashInfer Ninja generation
   required a no-space alias under `/tmp/opencode/qwen-bench`.
+- vLLM 0.27.1 plus the tested FlashInfer/NVFP4/MTP4 stack produced Xid 31 under
+  a mixed long-context then concurrency-four sequence. The GPU remained usable
+  and did not require reset, but that serving pattern is not validated as safe.
 
 ## Refreshing This Snapshot
 

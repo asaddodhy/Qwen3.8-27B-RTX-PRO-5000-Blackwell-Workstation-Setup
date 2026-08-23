@@ -244,6 +244,14 @@ print(response.choices[0].message.content)
 
 See [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology and interpretation.
 
+Long-context end-to-end tests measured 65.62 tok/s with an 8,158-token prompt
+and 41.85 tok/s with a 32,734-token prompt. Four simultaneous short requests
+reached 242.12 aggregate tok/s on a fresh server. However, concurrency four
+after sequential 8K and 32K requests triggered a vLLM/FlashInfer CUDA illegal
+memory access and Xid 31. Read the full failure sequence in
+`docs/BENCHMARKS.md`; concurrent mixed-context vLLM use is not considered fully
+stable in this package combination.
+
 ## Experimental NInfer Result
 
 NInfer is officially documented for RTX 5090 only, but unchanged `sm_120a`
