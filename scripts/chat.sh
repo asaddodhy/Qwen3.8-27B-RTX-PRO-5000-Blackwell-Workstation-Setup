@@ -9,7 +9,7 @@ PROMPT_JSON=$(printf '%s' "$PROMPT" | "$RUNTIME_DIR/bin/python" -c 'import json,
 
 curl --fail --silent --show-error "$BASE_URL/v1/chat/completions" \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer EMPTY' \
+  -H "Authorization: Bearer ${API_KEY:-EMPTY}" \
   -d "{
     \"model\": \"$SERVED_MODEL_NAME\",
     \"messages\": [{\"role\": \"user\", \"content\": $PROMPT_JSON}],

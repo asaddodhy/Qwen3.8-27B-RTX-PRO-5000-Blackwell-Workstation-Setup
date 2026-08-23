@@ -4,14 +4,17 @@ set -euo pipefail
 # shellcheck source=common.sh
 source "$(dirname -- "$0")/common.sh"
 
+AUTH_ARGS=()
+[[ -n "$API_KEY" ]] && AUTH_ARGS=(-H "Authorization: Bearer $API_KEY")
+
 if [[ ${1:-} != --wait ]]; then
-  curl --fail --silent --show-error "$BASE_URL/health"
+  curl --fail --silent --show-error "${AUTH_ARGS[@]}" "$BASE_URL/health"
   printf '\n'
   exit 0
 fi
 
 for _ in $(seq 1 360); do
-  if curl --fail --silent "$BASE_URL/health" >/dev/null; then
+  if curl --fail --silent "${AUTH_ARGS[@]}" "$BASE_URL/health" >/dev/null; then
     printf 'Server is healthy: %s/v1\n' "$BASE_URL"
     exit 0
   fi

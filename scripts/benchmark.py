@@ -7,6 +7,7 @@ import urllib.request
 host = os.environ.get("HOST", "127.0.0.1")
 port = os.environ.get("PORT", "8000")
 model = os.environ.get("SERVED_MODEL_NAME", "qwen3.8-27b")
+api_key = os.environ.get("API_KEY", "")
 url = f"http://{host}:{port}/v1/chat/completions"
 
 payload = {
@@ -31,7 +32,10 @@ def run(label: str) -> None:
     request = urllib.request.Request(
         url,
         data=json.dumps(payload).encode(),
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            **({"Authorization": f"Bearer {api_key}"} if api_key else {}),
+        },
     )
     started = time.perf_counter()
     with urllib.request.urlopen(request, timeout=600) as response:

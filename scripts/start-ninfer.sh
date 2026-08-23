@@ -4,6 +4,7 @@ set -euo pipefail
 # shellcheck source=ninfer-common.sh
 source "$(dirname -- "$0")/ninfer-common.sh"
 require_ninfer
+require_ninfer_network_auth
 
 if systemctl --user is-active --quiet "$NINFER_SERVICE_NAME"; then
   printf '%s is already running.\n' "$NINFER_SERVICE_NAME"
@@ -23,6 +24,7 @@ systemd-run --user --unit="$NINFER_SERVICE_NAME" \
   --host "$NINFER_HOST" \
   --port "$NINFER_PORT" \
   --model-id "$NINFER_MODEL_ID" \
+  --api-key "$NINFER_API_KEY" \
   --max-context "$NINFER_MAX_CONTEXT" \
   --kv-capacity "$NINFER_KV_CAPACITY" \
   --max-concurrency "$NINFER_MAX_CONCURRENCY" \

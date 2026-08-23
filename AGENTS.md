@@ -22,6 +22,8 @@ Before changing or reproducing the setup:
 10. Use the exact benchmark method in `docs/BENCHMARKS.md` for comparisons.
 11. Do not repeat the documented vLLM mixed 8K/32K-context then concurrency-four
     sequence: it caused an Xid 31 MMU fault in this package stack.
+12. Network-bound servers must have API keys. Never expose `0.0.0.0` with an
+    empty key, and never print or commit the ignored local config files.
 
 The supported vLLM baseline to protect is 84.27 tok/s average with MTP4,
 65,536 context limit, FP8 KV cache, text-only mode, and native SM120 NVFP4

@@ -3,7 +3,7 @@ schema: kit/1.0
 slug: qwen38-27b-rtx-pro-5000-blackwell
 title: Qwen3.8-27B on RTX PRO 5000 Blackwell Workstation
 summary: Reproduce an 84 tok/s Qwen3.8-27B NVFP4 vLLM server on an RTX PRO 5000 Blackwell 48 GB workstation.
-version: 1.2.0
+version: 1.3.0
 owner: asaddodhy
 license: MIT
 tags: [qwen3-8, vllm, nvfp4, blackwell, local-llm, inference, benchmark]
@@ -46,6 +46,9 @@ resolverHints:
   - match: Compare or tune inference speed
     load: [docs/BENCHMARKS.md, docs/NINFER.md]
     purpose: Preserve the benchmark method when comparing configurations.
+  - match: Add dashboard control or network access
+    load: [docs/NETWORK.md]
+    purpose: Preserve authentication, mutual exclusion, and firewall requirements.
 failures:
   - problem: FlashInfer Ninja generation broke on a workspace path containing spaces.
     resolution: Launch through the no-space alias /tmp/opencode/qwen-bench.
@@ -75,7 +78,7 @@ inputs:
     description: Network access to the public Inferact/Qwen3.8-27B-NVFP4 Hugging Face repository.
 outputs:
   - name: local_api
-    description: OpenAI-compatible Qwen3.8-27B endpoint at http://127.0.0.1:8000/v1.
+    description: Authenticated OpenAI-compatible Qwen3.8-27B endpoints available over localhost, trusted LAN, and Tailscale.
   - name: validated_runtime
     description: Pinned vLLM and CUDA environment with native SM120 NVFP4 kernels.
   - name: benchmark
@@ -197,7 +200,8 @@ differ. The existing validated runtime is temporary under `/tmp/opencode`.
 5. Run `./scripts/download-model.sh` only when the checkpoint is missing.
 6. Ensure no LM Studio, llama.cpp, or other compute process occupies the GPU.
 7. Run `./scripts/start-server.sh`, then `./scripts/health.sh --wait`.
-8. Verify `GET http://127.0.0.1:8000/v1/models` includes `qwen3.8-27b` and run
+8. Source the ignored config to obtain the bearer key, verify authenticated
+   `GET http://127.0.0.1:8000/v1/models` includes `qwen3.8-27b`, and run
    `./scripts/chat.sh "Reply with one short sentence."`.
 9. Run `./scripts/benchmark.py` after warm-up. Compare measured results with
    `docs/BENCHMARKS.md` while accounting for clocks, thermals, and active load.

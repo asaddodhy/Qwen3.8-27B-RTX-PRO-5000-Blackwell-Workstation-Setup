@@ -59,6 +59,7 @@ the per-request ceiling.
 │   ├── BENCHMARKS.md
 │   ├── INSTALLATION.md
 │   ├── MACHINE_SPECS.md
+│   ├── NETWORK.md
 │   └── NINFER.md
 └── scripts/
     ├── benchmark.py
@@ -182,10 +183,16 @@ Use `Ctrl-C` to stop following logs; this does not stop the model server.
 ## API Access
 
 ```text
-Base URL: http://127.0.0.1:8000/v1
-API key: EMPTY (or any non-empty value)
+Local base URL: http://127.0.0.1:8000/v1
+LAN base URL: http://192.168.1.6:8000/v1
+Tailscale base URL: http://100.73.145.5:8000/v1
+API key: value of API_KEY in the ignored config.env
 Model: qwen3.8-27b
 ```
+
+The tested machine now binds both engines to all local interfaces with distinct
+bearer keys stored in ignored local config files. LAN/Tailscale addresses,
+firewall rules, and security notes are in [docs/NETWORK.md](docs/NETWORK.md).
 
 Example request:
 
@@ -196,9 +203,10 @@ Example request:
 Direct `curl` example:
 
 ```bash
-curl http://127.0.0.1:8000/v1/chat/completions \
+set -a; source config.env; set +a
+curl http://192.168.1.6:8000/v1/chat/completions \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer EMPTY' \
+  -H "Authorization: Bearer $API_KEY" \
   -d '{
     "model": "qwen3.8-27b",
     "messages": [
@@ -213,11 +221,13 @@ curl http://127.0.0.1:8000/v1/chat/completions \
 Python clients should use:
 
 ```python
+import os
+
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://127.0.0.1:8000/v1",
-    api_key="EMPTY",
+    base_url="http://192.168.1.6:8000/v1",
+    api_key=os.environ["API_KEY"],
 )
 
 response = client.chat.completions.create(

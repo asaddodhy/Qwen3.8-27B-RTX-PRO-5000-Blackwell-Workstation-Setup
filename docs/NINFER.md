@@ -126,12 +126,16 @@ approximately 36 MiB desktop baseline.
 ## API
 
 ```text
-Base URL: http://127.0.0.1:8080/v1
+Local base URL: http://127.0.0.1:8080/v1
+LAN base URL: http://192.168.1.6:8080/v1
+Tailscale base URL: http://100.73.145.5:8080/v1
 Model ID: qwen3.8-27b-ninfer
-Authentication: disabled on localhost
+Authentication: bearer key from ignored config.ninfer.env
 ```
 
 NInfer supports OpenAI Chat Completions/Responses and Anthropic Messages.
+NInfer's `/health` remains unauthenticated by upstream design; `/v1/*` requires
+the configured bearer key.
 
 ## Benchmark Method
 

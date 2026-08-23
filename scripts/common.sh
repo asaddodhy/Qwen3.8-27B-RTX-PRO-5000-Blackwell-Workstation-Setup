@@ -22,6 +22,7 @@ MODEL_PATH=${MODEL_PATH:-/tmp/opencode/qwen-bench/models/Inferact-Qwen3.8-27B-NV
 SERVED_MODEL_NAME=${SERVED_MODEL_NAME:-qwen3.8-27b}
 HOST=${HOST:-127.0.0.1}
 PORT=${PORT:-8000}
+API_KEY=${API_KEY:-}
 MAX_MODEL_LEN=${MAX_MODEL_LEN:-65536}
 GPU_MEMORY_UTILIZATION=${GPU_MEMORY_UTILIZATION:-0.92}
 MAX_NUM_SEQS=${MAX_NUM_SEQS:-8}
@@ -33,6 +34,13 @@ PYTHON_VERSION=3.13
 CUDA_HOME="$RUNTIME_DIR/lib/python${PYTHON_VERSION}/site-packages/nvidia/cu13"
 VLLM_BIN="$RUNTIME_DIR/bin/vllm"
 BASE_URL="http://${HOST}:${PORT}"
+
+require_network_auth() {
+  if [[ "$HOST" != "127.0.0.1" && "$HOST" != "localhost" && -z "$API_KEY" ]]; then
+    printf 'API_KEY is required when HOST is %s. Refusing unauthenticated network exposure.\n' "$HOST" >&2
+    exit 1
+  fi
+}
 
 require_runtime() {
   if [[ ! -x "$VLLM_BIN" ]]; then

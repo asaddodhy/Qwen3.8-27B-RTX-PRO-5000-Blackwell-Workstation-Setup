@@ -24,8 +24,11 @@ Continue until the token limit.
 Run the included benchmark against a loaded server:
 
 ```bash
+set -a; source config.env; set +a
 ./scripts/benchmark.py
 ```
+
+For NInfer, source `config.ninfer.env` and run `./scripts/benchmark-ninfer.py`.
 
 ## Results
 
