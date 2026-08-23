@@ -50,3 +50,19 @@ tokens to improve throughput.
 These numbers are not universal model speed ratings. Long active contexts,
 reasoning mode, different output distributions, concurrent requests, and other
 sampling parameters can materially change MTP acceptance and throughput.
+
+## NInfer Comparison
+
+After the vLLM campaign, unchanged NInfer source compiled for `sm_120a` was
+validated experimentally on the same RTX PRO 5000. The same deterministic
+31-token prompt and 512-token output workload produced:
+
+| Setting | Run 1 | Run 2 | Run 3 | Average | Acceptance |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| NInfer MTP3 | 104.46 | 104.16 | 104.31 | 104.31 | 51.2% |
+| NInfer MTP4 | 121.46 | 121.18 | 120.99 | 121.21 | 48.4% |
+| **NInfer MTP5** | **130.68** | **130.39** | **130.06** | **130.37** | **47.9%** |
+
+NInfer used INT8 group-64 KV cache, CUDA graphs, 65,536 context/KV capacity,
+and maximum concurrency one. Prefix reuse remained enabled. See `docs/NINFER.md`
+for the distinction between upstream support and local validation.

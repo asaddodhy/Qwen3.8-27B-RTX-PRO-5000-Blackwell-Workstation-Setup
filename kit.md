@@ -3,7 +3,7 @@ schema: kit/1.0
 slug: qwen38-27b-rtx-pro-5000-blackwell
 title: Qwen3.8-27B on RTX PRO 5000 Blackwell Workstation
 summary: Reproduce an 84 tok/s Qwen3.8-27B NVFP4 vLLM server on an RTX PRO 5000 Blackwell 48 GB workstation.
-version: 1.0.0
+version: 1.1.0
 owner: asaddodhy
 license: MIT
 tags: [qwen3-8, vllm, nvfp4, blackwell, local-llm, inference, benchmark]
@@ -44,7 +44,7 @@ resolverHints:
     load: [docs/MACHINE_SPECS.md, docs/INSTALLATION.md, README.md]
     purpose: Load exact host constraints and package pins before changing the runtime.
   - match: Compare or tune inference speed
-    load: [docs/BENCHMARKS.md]
+    load: [docs/BENCHMARKS.md, docs/NINFER.md]
     purpose: Preserve the benchmark method when comparing configurations.
 failures:
   - problem: FlashInfer Ninja generation broke on a workspace path containing spaces.
@@ -62,6 +62,9 @@ failures:
   - problem: NVIDIA Xid 154 marked the GPU reset-required after a GSP heartbeat timeout.
     resolution: Reboot, verify nvidia-smi, and run a CUDA tensor operation before continuing.
     scope: environment
+  - problem: NInfer's 20 GiB artifact could not be reconstructed on the 31 GiB /tmp tmpfs.
+    resolution: Download the artifact directly to the persistent home filesystem.
+    scope: environment
 inputs:
   - name: workstation
     description: The RTX PRO 5000 Blackwell workstation described in docs/MACHINE_SPECS.md.
@@ -73,7 +76,7 @@ outputs:
   - name: validated_runtime
     description: Pinned vLLM and CUDA environment with native SM120 NVFP4 kernels.
   - name: benchmark
-    description: Repeatable single-stream 512-token throughput measurement.
+    description: Repeatable single-stream 512-token throughput measurements for vLLM and experimental NInfer.
 useCases:
   - scenario: Restore this workstation's known-good local Qwen deployment after reboot or environment loss.
     constraints: [One RTX PRO 5000 Blackwell, Ubuntu Linux, at least 64 GB host RAM]
@@ -112,6 +115,15 @@ fileManifest:
   - path: scripts/benchmark.py
     role: source
     description: Repeats the published throughput benchmark method.
+  - path: scripts/install-ninfer.sh
+    role: source
+    description: Builds and installs the pinned experimental NInfer runtime.
+  - path: scripts/start-ninfer.sh
+    role: source
+    description: Loads the NInfer artifact with the best measured MTP5 configuration.
+  - path: scripts/benchmark-ninfer.py
+    role: source
+    description: Repeats the NInfer comparison benchmark.
 selfContained: false
 environment:
   runtime: CPython 3.13, vLLM 0.27.1, PyTorch 2.13.0+cu132
@@ -124,9 +136,10 @@ environment:
 ## Goal
 
 Recreate and operate the known-good Qwen3.8-27B NVFP4 deployment that averaged
-84.27 generated tokens per second on this RTX PRO 5000 Blackwell workstation,
-including exact runtime pins, server lifecycle commands, API access, validation,
-and the benchmark method used to select MTP4.
+84.27 generated tokens per second with supported vLLM, plus the separately
+validated experimental NInfer deployment that averaged 130.37 tokens per
+second. Preserve runtime pins, lifecycle commands, API access, validation, and
+the benchmark methods used to select vLLM MTP4 and NInfer MTP5.
 
 ## When to Use
 
@@ -187,6 +200,10 @@ differ. The existing validated runtime is temporary under `/tmp/opencode`.
    `docs/BENCHMARKS.md` while accounting for clocks, thermals, and active load.
 10. Use `./scripts/stop-server.sh` to stop the API and unload the model. Confirm
     VRAM release with `./scripts/status.sh` or `nvidia-smi`.
+11. For the optional experimental NInfer path, read `docs/NINFER.md`, run
+    `./scripts/install-ninfer.sh`, download and verify its artifact, then use the
+    dedicated NInfer lifecycle and benchmark scripts. Never run both engines at
+    once on this 48 GB GPU.
 
 ## Failures Overcome
 

@@ -1,4 +1,5 @@
 config.env
+config.ninfer.env
 *.log
 __pycache__/
 .venv/

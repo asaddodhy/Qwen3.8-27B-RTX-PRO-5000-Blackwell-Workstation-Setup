@@ -21,5 +21,7 @@ Before changing or reproducing the setup:
 9. Validate server health and API output before benchmarking.
 10. Use the exact benchmark method in `docs/BENCHMARKS.md` for comparisons.
 
-The baseline to protect is 84.27 tok/s average with MTP4, 65,536 context limit,
-FP8 KV cache, text-only mode, and native SM120 NVFP4 kernels.
+The supported vLLM baseline to protect is 84.27 tok/s average with MTP4,
+65,536 context limit, FP8 KV cache, text-only mode, and native SM120 NVFP4
+kernels. The separate experimental NInfer baseline is 130.37 tok/s with MTP5;
+read `docs/NINFER.md` before changing it.

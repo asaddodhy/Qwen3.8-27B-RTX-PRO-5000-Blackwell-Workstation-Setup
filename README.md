@@ -4,8 +4,9 @@ Reproducible setup for running `Inferact/Qwen3.8-27B-NVFP4` on one NVIDIA
 RTX PRO 5000 Blackwell 48 GB with vLLM, native NVFP4 kernels, FP8 KV cache,
 CUDA graphs, and MTP speculative decoding.
 
-The best tested configuration generated **84.27 tokens/second** on average for
-a 512-token, single-request workload. MTP4 was 79% faster than no MTP.
+The best supported vLLM configuration generated **84.27 tokens/second** on
+average for a 512-token, single-request workload. An experimental NInfer build
+later reached **130.37 tokens/second** on the same GPU and client workload.
 
 ## Tested System
 
@@ -52,17 +53,20 @@ the per-request ceiling.
 ├── LICENSE
 ├── README.md
 ├── config.env.example
+├── config.ninfer.env.example
 ├── kit.md
 ├── docs/
 │   ├── BENCHMARKS.md
 │   ├── INSTALLATION.md
-│   └── MACHINE_SPECS.md
+│   ├── MACHINE_SPECS.md
+│   └── NINFER.md
 └── scripts/
     ├── benchmark.py
     ├── chat.sh
     ├── download-model.sh
     ├── health.sh
     ├── install-runtime.sh
+    ├── install-ninfer.sh
     ├── logs.sh
     ├── machine-inventory.sh
     ├── preflight.sh
@@ -239,6 +243,23 @@ print(response.choices[0].message.content)
 | MTP7 | 75.94, 73.43, 74.81 | 74.73 | 36.4% |
 
 See [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology and interpretation.
+
+## Experimental NInfer Result
+
+NInfer is officially documented for RTX 5090 only, but unchanged `sm_120a`
+source built and executed successfully on this RTX PRO 5000 Blackwell. Its best
+tested setting was MTP5:
+
+| Engine | Average tok/s |
+| --- | ---: |
+| vLLM MTP4 | 84.27 |
+| NInfer MTP3 | 104.31 |
+| NInfer MTP4 | 121.21 |
+| **NInfer MTP5** | **130.37** |
+
+NInfer is installed separately and does not replace vLLM. See
+[docs/NINFER.md](docs/NINFER.md) for support caveats, build details, checksums,
+locations, start/stop commands, API access, and complete benchmark results.
 
 ## Notes
 
