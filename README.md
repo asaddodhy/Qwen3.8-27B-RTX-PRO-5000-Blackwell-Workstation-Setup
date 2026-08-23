@@ -48,11 +48,15 @@ the per-request ceiling.
 
 ```text
 .
+├── AGENTS.md
+├── LICENSE
 ├── README.md
 ├── config.env.example
+├── kit.md
 ├── docs/
 │   ├── BENCHMARKS.md
-│   └── INSTALLATION.md
+│   ├── INSTALLATION.md
+│   └── MACHINE_SPECS.md
 └── scripts/
     ├── benchmark.py
     ├── chat.sh
@@ -60,6 +64,8 @@ the per-request ceiling.
     ├── health.sh
     ├── install-runtime.sh
     ├── logs.sh
+    ├── machine-inventory.sh
+    ├── preflight.sh
     ├── restart-server.sh
     ├── start-server.sh
     ├── status.sh
@@ -116,6 +122,11 @@ Download the model if it is not already present:
 
 See [docs/INSTALLATION.md](docs/INSTALLATION.md) for the full installation
 history, exact package pins, and troubleshooting details.
+
+The exact sanitized workstation specification is in
+[docs/MACHINE_SPECS.md](docs/MACHINE_SPECS.md). `kit.md` packages the workflow
+in Journey's `kit/1.0` format so a future agent can follow the same recovery,
+installation, validation, and benchmarking sequence.
 
 ## Load Model And Start Server
 
@@ -241,3 +252,17 @@ See [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology and interpretation.
   expect different VRAM usage and performance.
 - Bind to `0.0.0.0` only when LAN access is required, and add authentication or
   firewall rules before exposing the API beyond localhost.
+
+## Agent Reproduction Kit
+
+Future agents should begin with:
+
+```bash
+cp config.env.example config.env
+./scripts/machine-inventory.sh
+./scripts/preflight.sh
+```
+
+Then read `kit.md` and follow its ordered steps. The kit intentionally does not
+include model weights, the Python environment, or generated CUDA binaries, but
+the repository contains the scripts needed to recreate them.
