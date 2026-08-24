@@ -70,6 +70,21 @@ NInfer used INT8 group-64 KV cache, CUDA graphs, 65,536 context/KV capacity,
 and maximum concurrency one. Prefix reuse remained enabled. See `docs/NINFER.md`
 for the distinction between upstream support and local validation.
 
+### NInfer Groupwise-Int
+
+The published 16.96 GiB groupwise-int artifact was tested using the same NInfer
+server and client methodology. It internally allocates Q4/Q5/Q6 and W8 formats.
+
+| Setting | Run 1 | Run 2 | Run 3 | Average | Acceptance |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| **MTP3** | **106.46** | **106.08** | **105.82** | **106.12** | **58.8%** |
+| MTP4 | 100.72 | 100.10 | 99.46 | 100.09 | 50.7% |
+| MTP5 | 100.79 | 100.20 | 99.24 | 100.08 | 47.9% |
+
+Its best result is 18.6% slower than NVFP4 MTP5, while using about 3.1 GiB
+less observed GPU memory. See `docs/NINFER.md` for artifact identity, checksum,
+startup measurements, and published accuracy comparisons.
+
 ## vLLM Long-Context Results
 
 These requests used the validated vLLM MTP4 server and 512 generated tokens.

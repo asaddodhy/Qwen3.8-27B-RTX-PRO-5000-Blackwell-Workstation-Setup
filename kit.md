@@ -3,7 +3,7 @@ schema: kit/1.0
 slug: qwen38-27b-rtx-pro-5000-blackwell
 title: Qwen3.8-27B on RTX PRO 5000 Blackwell Workstation
 summary: Reproduce an 84 tok/s Qwen3.8-27B NVFP4 vLLM server on an RTX PRO 5000 Blackwell 48 GB workstation.
-version: 1.3.0
+version: 1.4.0
 owner: asaddodhy
 license: MIT
 tags: [qwen3-8, vllm, nvfp4, blackwell, local-llm, inference, benchmark]
@@ -16,6 +16,12 @@ model:
   name: Inferact/Qwen3.8-27B-NVFP4
   version: 6128240ebaf4eaa7bad2b3d1c72c37d677c5f462
   hosting: Local vLLM 0.27.1 server on one NVIDIA RTX PRO 5000 Blackwell 48 GB
+models:
+  - role: alternate-inference-profile
+    provider: huggingface
+    name: neroued/Qwen3.8-27B-NInfer
+    version: 18dfc887423fa5aabf3cb56fac41490e462b3fab
+    hosting: Local experimental NInfer groupwise-int artifact; best tested at 106.12 tok/s with MTP3
 parameters:
   - name: max_model_len
     value: "65536"

@@ -279,6 +279,10 @@ NInfer is installed separately and does not replace vLLM. See
 [docs/NINFER.md](docs/NINFER.md) for support caveats, build details, checksums,
 locations, start/stop commands, API access, and complete benchmark results.
 
+The smaller 16.96 GiB NInfer groupwise-int artifact was also tested. Its best
+setting was MTP3 at 106.12 tok/s, using approximately 3.1 GiB less observed
+VRAM than NVFP4. NVFP4 MTP5 remains the faster default.
+
 ## Notes
 
 - MTP4 was optimal for the tested output. MTP5-7 performed more speculative

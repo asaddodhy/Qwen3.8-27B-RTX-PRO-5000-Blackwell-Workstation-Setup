@@ -167,6 +167,68 @@ specific single-request workload. NInfer's internal phase metric reported
 approximately 130.8-131.4 decode tok/s on measured MTP5 requests and 3.38
 committed tokens per speculative round.
 
+## Groupwise-Int Artifact Comparison
+
+The second published Qwen3.8 NInfer profile was also downloaded, checksum
+verified, and tested on the same RTX PRO 5000. It is NInfer's custom mixed
+Q4/Q5/Q6 plus W8 artifact, not a GGUF and not a runtime-selectable Q4/Q5/Q6
+mode.
+
+```text
+Repository: neroued/Qwen3.8-27B-NInfer
+Filename: qwen3_8_27b.ninfer
+Size: 18,210,531,328 bytes (16.96 GiB)
+SHA-256: eec39564993d6e9c7d5e383382a760f093465c9d163ec9a1bd6ad50aaac6a509bbcb192a8afa5
+Persistent location:
+/home/dodhya/Documents/Default Project/qwen-bench/models/NInfer-Qwen3.8-27B-Groupwise/qwen3_8_27b.ninfer
+```
+
+The server configuration and client benchmark were otherwise identical to the
+NVFP4 tests: 65,536 context/KV capacity, INT8 group-64 KV, CUDA graphs,
+single-request capacity, thinking disabled, and 31 prompt plus 512 output
+tokens.
+
+| Groupwise setting | Measured tok/s | Average | Acceptance |
+| --- | --- | ---: | ---: |
+| **MTP3** | **106.46, 106.08, 105.82** | **106.12** | **58.8%** |
+| MTP4 | 100.72, 100.10, 99.46 | 100.09 | 50.7% |
+| MTP5 | 100.79, 100.20, 99.24 | 100.08 | 47.9% |
+
+MTP3 is the optimum tested window for groupwise-int. Wider windows increased
+speculative work but did not improve committed throughput.
+
+### Resource Comparison
+
+| Metric | Groupwise-int | NVFP4 |
+| --- | ---: | ---: |
+| Best setting | MTP3 | MTP5 |
+| Best average throughput | 106.12 tok/s | **130.37 tok/s** |
+| Artifact size | **16.96 GiB** | 20.02 GiB |
+| Observed GPU memory while serving | **20,189 MiB** | 23,323 MiB |
+| Free after weights | **30.26 GiB** | 27.21 GiB |
+| Model startup from SATA storage | **33.6-34.1 s** | 39.4-41.8 s |
+
+Groupwise-int uses approximately 3.1 GiB less observed VRAM and starts about
+6-8 seconds faster, but its best measured generation throughput is 18.6% lower
+than NVFP4 for this workload. NVFP4 remains the default active NInfer profile.
+
+### Published Accuracy Results
+
+NInfer's model cards report these matching evaluation rows:
+
+| Benchmark | Groupwise-int | NVFP4 |
+| --- | ---: | ---: |
+| IFBench | **77.67%** | 77.00% |
+| AIME 2025 | 96.67% | 96.67% |
+| AIME 2026 | 96.67% | 96.67% |
+| GPQA Diamond | 87.37% | **90.40%** |
+| ERQA | 66.25% | 66.25% |
+| RealWorldQA | 82.22% | **83.53%** |
+
+These are single-sample evaluation results. NVFP4 leads on GPQA and
+RealWorldQA, groupwise-int narrowly leads on IFBench, and the other listed
+tests tie. They do not establish universal accuracy for every workload.
+
 ## Functional Validation
 
 A CLI run with MTP3, 16K context, INT8 KV, CUDA graphs, and 64 generated tokens
