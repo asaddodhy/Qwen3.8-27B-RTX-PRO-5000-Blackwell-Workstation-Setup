@@ -279,6 +279,10 @@ NInfer is installed separately and does not replace vLLM. See
 [docs/NINFER.md](docs/NINFER.md) for support caveats, build details, checksums,
 locations, start/stop commands, API access, and complete benchmark results.
 
+NInfer also supports per-request Qwen reasoning levels: `none`, `low`,
+`medium`, and `xhigh`. The same levels can be exposed as OpenCode model
+variants; see `docs/NINFER.md` for the API contract and configuration behavior.
+
 The smaller 16.96 GiB NInfer groupwise-int artifact was also tested. Its best
 setting was MTP3 at 106.12 tok/s, using approximately 3.1 GiB less observed
 VRAM than NVFP4. NVFP4 MTP5 remains the faster default.

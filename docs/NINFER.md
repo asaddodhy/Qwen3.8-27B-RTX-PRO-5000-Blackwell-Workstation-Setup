@@ -137,6 +137,75 @@ NInfer supports OpenAI Chat Completions/Responses and Anthropic Messages.
 NInfer's `/health` remains unauthenticated by upstream design; `/v1/*` requires
 the configured bearer key.
 
+## Per-Request Thinking Level
+
+NInfer exposes Qwen3.8's thinking level per API request. The running server may
+use `--no-thinking` as its default while individual authenticated requests
+enable a supported reasoning effort without restarting or reloading the model.
+
+For OpenAI Chat Completions, send the top-level field:
+
+```json
+{
+  "model": "qwen3.8-27b-ninfer",
+  "messages": [{"role": "user", "content": "Solve this problem."}],
+  "reasoning_effort": "medium",
+  "max_tokens": 2048
+}
+```
+
+Supported values for this Qwen3.8 artifact are:
+
+| Value | Behavior |
+| --- | --- |
+| `none` | Disable thinking and answer directly |
+| `low` | Enable light reasoning |
+| `medium` | Enable balanced reasoning |
+| `xhigh` | Enable the template's maximum reasoning effort |
+
+NInfer's generic OpenAI-compatible parser also recognizes the protocol strings
+`minimal`, `high`, and `max`. Recognition only means those strings are valid at
+the API schema layer. The embedded Qwen3.8 chat template does not expose those
+three effort levels, so capability validation rejects them with HTTP 400 and
+error code `reasoning_effort_not_supported`. They are not aliases for `low`,
+`medium`, or `xhigh`.
+
+Do not send contradictory fields. For example,
+`reasoning_effort: "medium"` together with `enable_thinking: false` is rejected
+as `conflicting_template_option`.
+
+Reasoning output is returned separately from the answer:
+
+```json
+{
+  "reasoning_content": "...internal reasoning text...",
+  "content": "...final answer..."
+}
+```
+
+The behavior was validated against the running authenticated server through
+OpenCode: `none`, `low`, `medium`, and `xhigh` all completed successfully;
+`none` returned no reasoning text, while the other three returned separate
+`reasoning_content`.
+
+### OpenCode
+
+OpenCode's `@ai-sdk/openai-compatible` provider maps its camel-case
+`reasoningEffort` option to NInfer's `reasoning_effort` request field. Configure
+the model with variants named `none`, `low`, `medium`, and `xhigh`, then select
+or cycle the variant in OpenCode. From the CLI:
+
+```bash
+opencode run \
+  --model ninfer/qwen3.8-27b-ninfer \
+  --variant medium \
+  --thinking \
+  "Explain why this algorithm is correct."
+```
+
+OpenCode credentials should store the NInfer bearer key under provider
+`ninfer`; do not embed the key in `opencode.jsonc`.
+
 ## Benchmark Method
 
 The same deterministic client workload used for vLLM was used here:
